@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const statsDiv = document.getElementById('stats');
   
     let allTabs = [];
+
+    // searchInput 自动聚焦
+    searchInput.focus();
   
     function getTabs() {
       return new Promise((resolve) => {
@@ -28,56 +31,64 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   
     function displayTabs(groups) {
-      tabGroups.innerHTML = '';
-      for (const domain in groups) {
-        const groupElement = document.createElement('div');
-        groupElement.className = 'group';
-  
-        const groupHeader = document.createElement('div');
-        groupHeader.className = 'group-header';
-        groupHeader.textContent = domain;
-        groupElement.appendChild(groupHeader);
-  
-        groups[domain].forEach(tab => {
-          const tabElement = document.createElement('div');
-          tabElement.className = 'tab-item';
-  
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.className = 'tab-checkbox';
-          tabElement.appendChild(checkbox);
-  
-          const favicon = document.createElement('img');
-          favicon.className = 'tab-favicon';
-          favicon.src = tab.favIconUrl || 'default-favicon.png';
-          tabElement.appendChild(favicon);
-  
-          const tabTitle = document.createElement('span');
-          tabTitle.textContent = tab.title;
-          tabElement.appendChild(tabTitle);
-  
-          const closeButton = document.createElement('span');
-          closeButton.className = 'tab-close';
-          closeButton.textContent = '✕';
-          closeButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            chrome.tabs.remove(tab.id);
-            tabElement.remove();
-            updateStats();
+        tabGroups.innerHTML = '';
+        for (const domain in groups) {
+          const groupElement = document.createElement('div');
+          groupElement.className = 'group';
+      
+          const groupHeader = document.createElement('div');
+          groupHeader.className = 'group-header';
+          groupHeader.textContent = domain;
+          groupElement.appendChild(groupHeader);
+      
+          groups[domain].forEach(tab => {
+            const tabElement = document.createElement('div');
+            tabElement.className = 'tab-item';
+            tabElement.dataset.tabId = tab.id;
+      
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'tab-checkbox';
+            // 阻止 checkbox 点击事件冒泡
+            checkbox.addEventListener('click', (e) => {
+              e.stopPropagation();
+            });
+            tabElement.appendChild(checkbox);
+      
+            const favicon = document.createElement('img');
+            favicon.className = 'tab-favicon';
+            favicon.src = tab.favIconUrl || 'default-favicon.png';
+            tabElement.appendChild(favicon);
+      
+            const tabTitle = document.createElement('span');
+            tabTitle.textContent = tab.title;
+            tabElement.appendChild(tabTitle);
+      
+            const closeButton = document.createElement('span');
+            closeButton.className = 'tab-close';
+            closeButton.textContent = '✕';
+            closeButton.addEventListener('click', (e) => {
+              e.stopPropagation();
+              chrome.tabs.remove(tab.id);
+              tabElement.remove();
+              updateStats();
+            });
+            tabElement.appendChild(closeButton);
+      
+            // 修改点击事件，只有在没有点击 checkbox 时才切换标签页
+            tabElement.addEventListener('click', function(e) {
+              if (e.target !== checkbox) {
+                chrome.tabs.update(tab.id, {active: true});
+              }
+            });
+      
+            groupElement.appendChild(tabElement);
           });
-          tabElement.appendChild(closeButton);
-  
-          tabElement.addEventListener('click', function() {
-            chrome.tabs.update(tab.id, {active: true});
-          });
-  
-          groupElement.appendChild(tabElement);
-        });
-  
-        tabGroups.appendChild(groupElement);
+      
+          tabGroups.appendChild(groupElement);
+        }
+        updateStats();
       }
-      updateStats();
-    }
   
     function updateStats() {
       const totalTabs = allTabs.length;
