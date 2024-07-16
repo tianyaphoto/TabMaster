@@ -2,13 +2,27 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
   <title>Tab Manager</title>
   <link rel="stylesheet" type="text/css" href="popup.css">
 </head>
 <body>
   <div class="container">
-    <input type="text" id="search" placeholder="search...">
-    <button id="group-tabs">Auto Group</button>
+    <div class="header">
+      <input type="text" id="search" placeholder="搜索标签页...">
+      <select id="sort-select">
+        <option value="default">默认排序</option>
+        <option value="title">按标题排序</option>
+        <option value="domain">按域名排序</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button id="group-tabs">自动分组</button>
+      <button id="save-session">保存会话</button>
+      <button id="load-session">加载会话</button>
+      <button id="close-selected">关闭选中</button>
+    </div>
+    <div id="stats"></div>
     <div id="tab-groups"></div>
   </div>
   <script src="popup.js"></script>

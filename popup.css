@@ -1,6 +1,6 @@
 /* popup.css */
 body {
-    width: 400px;
+    width: 500px;
     padding: 20px;
     font-family: Arial, sans-serif;
   }
@@ -10,26 +10,45 @@ body {
     flex-direction: column;
   }
   
-  #search {
-    width: 100%;
-    padding: 8px;
+  .header {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 10px;
+  }
+  
+  #search, #sort-select {
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
   
-  #group-tabs {
+  #search {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  button {
     padding: 8px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-bottom: 10px;
   }
   
-  #group-tabs:hover {
+  button:hover {
     background-color: #45a049;
+  }
+  
+  #stats {
+    margin-bottom: 10px;
+    font-style: italic;
   }
   
   .group {
@@ -43,12 +62,14 @@ body {
     background-color: #f0f0f0;
     padding: 8px;
     font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .tab-item {
     padding: 8px;
     border-top: 1px solid #e0e0e0;
-    cursor: pointer;
     display: flex;
     align-items: center;
   }
@@ -61,4 +82,18 @@ body {
     width: 16px;
     height: 16px;
     margin-right: 8px;
+  }
+  
+  .tab-checkbox {
+    margin-right: 8px;
+  }
+  
+  .tab-close {
+    margin-left: auto;
+    cursor: pointer;
+    color: #999;
+  }
+  
+  .tab-close:hover {
+    color: #f44336;
   }
