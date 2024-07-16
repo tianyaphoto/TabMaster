@@ -1,0 +1,64 @@
+/* popup.css */
+body {
+    width: 400px;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #search {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  #group-tabs {
+    padding: 8px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  
+  #group-tabs:hover {
+    background-color: #45a049;
+  }
+  
+  .group {
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .group-header {
+    background-color: #f0f0f0;
+    padding: 8px;
+    font-weight: bold;
+  }
+  
+  .tab-item {
+    padding: 8px;
+    border-top: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .tab-item:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .tab-favicon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
