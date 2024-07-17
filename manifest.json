@@ -3,20 +3,32 @@
     "name": "增强型标签管理器",
     "version": "1.2",
     "description": "管理你的 Chrome 标签页，提供高级功能",
-    "permissions": ["tabs", "tabGroups", "storage", "history", "bookmarks"],
+    "permissions": [
+        "tabs",
+        "tabGroups",
+        "storage",
+        "history",
+        "bookmarks"
+    ],
     "action": {
-      "default_popup": "popup.html"
+        "default_popup": "popup.html"
     },
     "commands": {
-      "_execute_action": {
-        "suggested_key": {
-          "default": "Ctrl+Shift+Y",
-          "mac": "Command+Shift+Y"
-        },
-        "description": "打开标签管理器"
-      }
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Y",
+                "mac": "Command+Shift+Y"
+            },
+            "description": "打开标签管理器"
+        }
+    },
+    "icons": {
+        "16": "icon16.png",
+        "32": "icon32.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
     },
     "background": {
-      "service_worker": "background.js"
+        "service_worker": "background.js"
     }
-  }
+}
