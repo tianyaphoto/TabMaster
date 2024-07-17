@@ -109,9 +109,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function filterTabs(tabs, searchTerm) {
-        return tabs.filter(tab =>
-            tab.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const searchLower = searchTerm.toLowerCase();
+        return tabs.filter(tab => {
+            const title = tab.title.toLowerCase();
+            const url = new URL(tab.url);
+            const domain = url.hostname.toLowerCase();
+            const fullUrl = tab.url.toLowerCase();
+
+            // 检查标题
+            if (title.includes(searchLower)) {
+                return true;
+            }
+
+            // 检查完整URL
+            if (fullUrl.includes(searchLower)) {
+                return true;
+            }
+
+            // 检查域名及其部分
+            const domainParts = domain.split('.');
+            return domainParts.some(part => part.includes(searchLower));
+        });
     }
 
     function updateDisplayWithFilter(searchTerm) {
