@@ -265,39 +265,126 @@ document.addEventListener('DOMContentLoaded', function () {
     const recentTabsList = document.getElementById('recent-tabs-list');
     // 获取并显示最近关闭的标签页
     function displayRecentTabs() {
-      chrome.history.search({text: '', maxResults: 10}, function(historyItems) {
-        recentTabsList.innerHTML = '';
-        const recentTabs = historyItems.filter(item => item.url !== undefined);
-        
-        recentTabs.forEach((tab, index) => {
-          const tabElement = document.createElement('div');
-          tabElement.className = 'recent-tab-item';
-          
-          const favicon = document.createElement('img');
-          favicon.className = 'tab-favicon';
-          favicon.src = `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}`;
-          tabElement.appendChild(favicon);
-  
-          const tabTitle = document.createElement('span');
-          tabTitle.textContent = tab.title || tab.url;
-          tabElement.appendChild(tabTitle);
-  
-          tabElement.addEventListener('click', function() {
-            chrome.tabs.create({url: tab.url});
-          });
-  
-          recentTabsList.appendChild(tabElement);
+        chrome.history.search({ text: '', maxResults: 10 }, function (historyItems) {
+            recentTabsList.innerHTML = '';
+            const recentTabs = historyItems.filter(item => item.url !== undefined);
+
+            recentTabs.forEach((tab, index) => {
+                const tabElement = document.createElement('div');
+                tabElement.className = 'recent-tab-item';
+
+                const favicon = document.createElement('img');
+                favicon.className = 'tab-favicon';
+                favicon.src = `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}`;
+                tabElement.appendChild(favicon);
+
+                const tabTitle = document.createElement('span');
+                tabTitle.textContent = tab.title || tab.url;
+                tabElement.appendChild(tabTitle);
+
+                tabElement.addEventListener('click', function () {
+                    chrome.tabs.create({ url: tab.url });
+                });
+
+                recentTabsList.appendChild(tabElement);
+            });
         });
-      });
     }
-  
+
     // 初始显示最近关闭的标签页
     displayRecentTabs();
-  
+
     // 每次打开插件时刷新最近关闭的标签页列表
-    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-      if (request.action === "popupOpened") {
-        displayRecentTabs();
-      }
+    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        if (request.action === "popupOpened") {
+            displayRecentTabs();
+        }
+    });
+
+
+
+
+    const commandInput = document.getElementById('command-input');
+
+    // 命令处理函数
+    const commands = {
+        '/help': () => {
+            return `可用命令：
+        /help - 显示帮助信息
+        /close_duplicates - 关闭所有重复标签
+        /bookmark_all - 将所有标签保存为书签
+        /close_all - 关闭所有标签（保留当前标签）
+        /close_left - 关闭左侧所有标签
+        /close_right - 关闭右侧所有标签`;
+        },
+        '/close_duplicates': async () => {
+            const tabs = await getTabs();
+            const uniqueUrls = new Set();
+            const duplicates = [];
+            tabs.forEach(tab => {
+                if (uniqueUrls.has(tab.url)) {
+                    duplicates.push(tab.id);
+                } else {
+                    uniqueUrls.add(tab.url);
+                }
+            });
+            await chrome.tabs.remove(duplicates);
+            return `已关闭 ${duplicates.length} 个重复标签`;
+        },
+        '/bookmark_all': async () => {
+            const tabs = await getTabs();
+            const folder = await chrome.bookmarks.create({ title: 'Saved Tabs ' + new Date().toLocaleString() });
+            for (const tab of tabs) {
+                await chrome.bookmarks.create({ parentId: folder.id, title: tab.title, url: tab.url });
+            }
+            return `已将 ${tabs.length} 个标签保存为书签`;
+        },
+        '/close_all': async () => {
+            const tabs = await getTabs();
+            const currentTab = tabs.find(tab => tab.active);
+            const tabsToClose = tabs.filter(tab => tab.id !== currentTab.id).map(tab => tab.id);
+            await chrome.tabs.remove(tabsToClose);
+            return `已关闭 ${tabsToClose.length} 个标签`;
+        },
+        '/close_left': async () => {
+            const tabs = await getTabs();
+            const currentTabIndex = tabs.findIndex(tab => tab.active);
+            const tabsToClose = tabs.slice(0, currentTabIndex).map(tab => tab.id);
+            await chrome.tabs.remove(tabsToClose);
+            return `已关闭左侧 ${tabsToClose.length} 个标签`;
+        },
+        '/close_right': async () => {
+            const tabs = await getTabs();
+            const currentTabIndex = tabs.findIndex(tab => tab.active);
+            const tabsToClose = tabs.slice(currentTabIndex + 1).map(tab => tab.id);
+            await chrome.tabs.remove(tabsToClose);
+            return `已关闭右侧 ${tabsToClose.length} 个标签`;
+        }
+    };
+
+    // 处理命令输入
+    commandInput.addEventListener('keydown', async function (e) {
+        if (e.key === 'Enter') {
+            const command = this.value.trim().toLowerCase();
+            let result = '';
+
+            if (commands[command]) {
+                result = await commands[command]();
+            } else {
+                result = '未知命令。输入 /help 查看可用命令。';
+            }
+
+            // 显示命令执行结果
+            const resultElement = document.createElement('div');
+            resultElement.className = 'command-result';
+            resultElement.textContent = result;
+            this.parentNode.insertBefore(resultElement, this.nextSibling);
+
+            // 清空输入框
+            this.value = '';
+
+            // 更新标签页显示
+            updateDisplay();
+        }
     });
 });
