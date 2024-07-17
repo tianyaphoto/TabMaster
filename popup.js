@@ -260,4 +260,44 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.tabs.remove(tabIds);
         updateDisplay();
     });
+
+
+    const recentTabsList = document.getElementById('recent-tabs-list');
+    // 获取并显示最近关闭的标签页
+    function displayRecentTabs() {
+      chrome.history.search({text: '', maxResults: 10}, function(historyItems) {
+        recentTabsList.innerHTML = '';
+        const recentTabs = historyItems.filter(item => item.url !== undefined);
+        
+        recentTabs.forEach((tab, index) => {
+          const tabElement = document.createElement('div');
+          tabElement.className = 'recent-tab-item';
+          
+          const favicon = document.createElement('img');
+          favicon.className = 'tab-favicon';
+          favicon.src = `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}`;
+          tabElement.appendChild(favicon);
+  
+          const tabTitle = document.createElement('span');
+          tabTitle.textContent = tab.title || tab.url;
+          tabElement.appendChild(tabTitle);
+  
+          tabElement.addEventListener('click', function() {
+            chrome.tabs.create({url: tab.url});
+          });
+  
+          recentTabsList.appendChild(tabElement);
+        });
+      });
+    }
+  
+    // 初始显示最近关闭的标签页
+    displayRecentTabs();
+  
+    // 每次打开插件时刷新最近关闭的标签页列表
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+      if (request.action === "popupOpened") {
+        displayRecentTabs();
+      }
+    });
 });

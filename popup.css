@@ -111,3 +111,29 @@ body {
     font-size: 12px;
     font-weight: bold;
   }
+
+  #recent-tabs-section {
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
+  }
+  
+  #recent-tabs-section h3 {
+    margin-bottom: 10px;
+  }
+  
+  .recent-tab-item {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .recent-tab-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .recent-tab-item .tab-favicon {
+    margin-right: 8px;
+  }
