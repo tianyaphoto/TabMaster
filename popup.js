@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function displayTabs(groups) {
         tabGroups.innerHTML = '';
+        let tabIndex = 1;
+        const tabElements = [];
+
         for (const domain in groups) {
             const groupElement = document.createElement('div');
             groupElement.className = 'group';
@@ -44,6 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const tabElement = document.createElement('div');
                 tabElement.className = 'tab-item';
                 tabElement.dataset.tabId = tab.id;
+
+                if (tabIndex <= 9) {
+                    const shortcutSpan = document.createElement('span');
+                    shortcutSpan.className = 'tab-shortcut';
+                    shortcutSpan.textContent = tabIndex;
+                    tabElement.appendChild(shortcutSpan);
+                }
 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -80,11 +90,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 groupElement.appendChild(tabElement);
+                tabElements.push(tabElement);
+                tabIndex++;
             });
 
             tabGroups.appendChild(groupElement);
         }
+
         updateStats();
+        return tabElements;
+    }
+
+    function getDisplayWithFilter(searchTerm) {
+        const filteredTabs = filterTabs(allTabs, searchTerm);
+        const groups = groupTabs(filteredTabs);
+        const tabElements = displayTabs(groups);
+        return { count: filteredTabs.length, elements: tabElements };
     }
 
     function updateStats() {
@@ -147,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateDisplay();
 
+    // 修改搜索输入事件处理器
     searchInput.addEventListener('input', function () {
         updateDisplayWithFilter(this.value);
     });
@@ -161,6 +183,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     chrome.tabs.update(tabId, { active: true });
                     window.close();
                 }
+            }
+        } else if (e.ctrlKey && e.key >= '1' && e.key <= '9') {
+            e.preventDefault(); // 阻止默认行为，如 Ctrl+1 打开第一个书签
+            const index = parseInt(e.key) - 1;
+            const filteredResult = getDisplayWithFilter(searchInput.value);
+            if (filteredResult.count <= 9 && index < filteredResult.count) {
+                const tabElement = filteredResult.elements[index];
+                const tabId = parseInt(tabElement.dataset.tabId);
+                chrome.tabs.update(tabId, { active: true });
+                window.close();
+            }
+        }
+    });
+
+    // 添加数字键快捷方式
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            window.close();  // 关闭弹出窗口
+        } else if (e.ctrlKey && e.key >= '1' && e.key <= '9') {
+            e.preventDefault(); // 阻止默认行为，如 Ctrl+1 打开第一个书签
+            const index = parseInt(e.key) - 1;
+            const filteredResult = getDisplayWithFilter(searchInput.value);
+            if (filteredResult.count <= 9 && index < filteredResult.count) {
+                const tabElement = filteredResult.elements[index];
+                const tabId = parseInt(tabElement.dataset.tabId);
+                chrome.tabs.update(tabId, { active: true });
+                window.close();
             }
         }
     });
@@ -210,12 +259,5 @@ document.addEventListener('DOMContentLoaded', function () {
         );
         chrome.tabs.remove(tabIds);
         updateDisplay();
-    });
-
-    // 添加对 ESC 键的监听
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            window.close();  // 关闭弹出窗口
-        }
     });
 });
