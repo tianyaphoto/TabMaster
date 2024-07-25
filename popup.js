@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             groups[domain].forEach(tab => {
                 const tabElement = document.createElement('div');
-                tabElement.className = 'tab-item';
+                tabElement.className = `tab-item${tab.pinned ? ' pinned' : ''}`;
                 tabElement.dataset.tabId = tab.id;
 
                 if (tabIndex <= 9) {
@@ -83,9 +83,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 tabElement.appendChild(closeButton);
 
-                tabElement.addEventListener('click', function (e) {
+                tabElement.addEventListener('click', async function (e) {
                     if (e.target !== checkbox) {
+                        await updatePinnedStatus(tab.id, true);
+                        updateTabElementPinnedStatus(tabElement, true);
                         chrome.tabs.update(tab.id, { active: true });
+                        window.close();
                     }
                 });
 
@@ -388,3 +391,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+async function updatePinnedStatus(tabId, isPinned) {
+    await chrome.tabs.update(tabId, { pinned: isPinned });
+    if (isPinned) {
+        await chrome.tabs.move(tabId, { index: 0 });
+    }
+}
+
+function updateTabElementPinnedStatus(tabElement, isPinned) {
+    if (isPinned) {
+        tabElement.classList.add('pinned');
+    } else {
+        tabElement.classList.remove('pinned');
+    }
+}
